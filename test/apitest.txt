@@ -1,0 +1,31 @@
+http://localhost:3000/api/users
+
+{
+  "username": "sathish",
+  "role": "admin"
+}
+--------------------------------
+http://localhost:3000/api/categories
+
+{
+  "name": "Iphones"
+}
+
+--------------------------------
+
+http://localhost:3000/api/categories/671e65c136d2c5bd7c2c5651/subcategories
+
+{
+  "name": "IPads"
+}
+--------------------------------
+http://localhost:3000/api/products
+
+{
+  "title": "iPhone 16 Pro 512gb",
+  "description": "Apple's latest flagship smartphone with advanced camera system and A15 Bionic chip",
+  "price": 999.99,
+  "image": "https://example.com/iphone13pro.jpg",
+  "categoryId": "671e65c136d2c5bd7c2c5651",
+  "subCategoryId": "671e674f36d2c5bd7c2c5653"
+}

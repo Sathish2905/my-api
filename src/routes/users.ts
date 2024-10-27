@@ -2,6 +2,41 @@ import express from 'express';
 import User, { IUser } from '../models/User';
 
 const router = express.Router();
+// User Login
+router.post('/login', async (req, res) => {
+  const { username, password } = req.body;
+
+  // Validate request body
+  if (!username || !password) {
+    return res.status(400).json({ error: 'Username and password are required' });
+  }
+
+  try {
+    // Find user by username
+    const user = await User.findOne({ username });
+    if (!user) {
+      return res.status(401).json({ error: 'Invalid username or password' });
+    }
+
+    // Compare passwords
+    const isMatch = await user.comparePassword(password);
+    if (!isMatch) {
+      return res.status(401).json({ error: 'Invalid username or password' });
+    }
+
+    // Create response object without password
+    const userResponse = user.toObject();
+    delete userResponse.password;
+
+    res.json(userResponse);
+  } catch (error) {
+    if (error instanceof Error) {
+      res.status(400).json({ error: error.message });
+    } else {
+      res.status(400).json({ error: 'An unknown error occurred' });
+    }
+  }
+});
 
 // Create User
 router.post('/', async (req, res) => {

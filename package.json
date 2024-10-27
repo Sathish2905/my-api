@@ -1,0 +1,42 @@
+{
+  "name": "package",
+  "version": "1.0.0",
+  "description": "A RESTful API built with Node.js, Express, TypeScript, and MongoDB.",
+  "main": "dist/index.js",
+  "scripts": {
+    "start": "node dist/server.js",
+    "dev": "ts-node src/server.ts",
+    "build": "tsc",
+    "test": "jest"
+  },
+  "keywords": [
+    "node",
+    "express",
+    "typescript",
+    "mongodb",
+    "api"
+  ],
+  "author": "Sathish",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "mongodb": "^4.17.1",
+    "mongoose": "^6.10.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.0",
+    "@types/jest": "^26.0.0",
+    "@types/mongodb": "^4.0.7",
+    "@types/node": "^14.0.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.2.5",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.6.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "my-api"
+  }
+}

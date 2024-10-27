@@ -90,24 +90,24 @@ http://localhost:3000/api
 
 #### Read a resource
 
-- **GET** `/resource/:id`
+- **GET** `/api/users/:id`
 - **Description:** Fetches a resource by ID.
 
 #### Update a resource
 
-- **PUT** `/resource/:id`
+- **PUT** `/users/:id`
 - **Description:** Updates a resource by ID.
 - **Request Body:** 
   ```json
   {
-    "name": "Updated Name",
-    "description": "Updated Description"
-  }
+  "username": "sathish",
+  "role": "admin"
+}
   ```
 
 #### Delete a resource
 
-- **DELETE** `/resource/:id`
+- **DELETE** `/users/:id`
 - **Description:** Deletes a resource by ID.
 
 ## Contributing

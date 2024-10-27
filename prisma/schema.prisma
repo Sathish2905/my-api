@@ -16,6 +16,7 @@ datasource db {
 model User {
   id       String   @id
   username String
+  password String
   role     Role
   CartItem CartItem[]
   Wishlist Wishlist[]

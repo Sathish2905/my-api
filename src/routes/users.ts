@@ -5,12 +5,23 @@ const router = express.Router();
 
 // Create User
 router.post('/', async (req, res) => {
-  const { username, role } = req.body;
-  const newUser: IUser = new User({ username, role });
+  const { username, password, role } = req.body;
+  if (!password) {
+    return res.status(400).json({ error: 'Password is required' });
+  }
+
+  const newUser: IUser = new User({ 
+    username, 
+    password, // The actual password hashing should be handled in the User model
+    role 
+  });
 
   try {
     const savedUser = await newUser.save();
-    res.status(201).json(savedUser);
+    // Don't send password back in response
+    const userResponse = savedUser.toObject();
+    delete userResponse.password;
+    res.status(201).json(userResponse);
   } catch (error) {
     if (error instanceof Error) {
       res.status(400).json({ error: error.message });

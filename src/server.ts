@@ -1,12 +1,23 @@
 import express from 'express';
+import cors from 'cors';
 import mongoose from 'mongoose';
 import routes from './routes';
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 
 // Middleware
 app.use(express.json());
+
+app.use(cors({
+  origin: 'http://localhost:3000'
+}));
+
+// Your other middleware and routes go here
+
+// app.listen(3002, () => {
+//   console.log('Server running on http://localhost:3002');
+// });
 
 // Connect to MongoDB
 mongoose.set('strictQuery', false);  // or true, depending on your needs

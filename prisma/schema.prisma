@@ -45,6 +45,7 @@ model SubCategory {
 }
 
 model CartItem {
+  id        String  @id
   productId String
   quantity  Int
   userId    String
@@ -53,6 +54,7 @@ model CartItem {
 }
 
 model Wishlist {
+  id        String  @id
   productId String
   userId    String
   User      User    @relation(fields: [userId], references: [id])

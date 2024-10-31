@@ -27,16 +27,39 @@ router.post('/', async (req, res) => {
 // Get Products with optional filters
 router.get('/', async (req, res) => {
   try {
-    const { categoryId, subcategoryId } = req.query;
-    let query = {};
-
-    if (categoryId && subcategoryId) {
-      query = { categoryId, subCategoryId: subcategoryId };
-    } else if (categoryId) {
-      query = { categoryId };
+    const { categoryId, subCategoryId, minPrice, maxPrice, search } = req.query;
+    // Build filter object
+    const filter: any = {};
+    
+    if (categoryId) {
+      filter.categoryId = categoryId;
+    }
+    
+    if (subCategoryId) {
+      filter.subCategoryId = subCategoryId;
+    }
+    
+    if (minPrice || maxPrice) {
+      filter.price = {};
+      if (minPrice) filter.price.$gte = Number(minPrice);
+      if (maxPrice) filter.price.$lte = Number(maxPrice);
+    }
+    
+    if (search) {
+      filter.$or = [
+        { title: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } }
+      ];
     }
 
-    const products = await Product.find(query);
+    const products = await Product.find(filter);
+    console.log('Request:', {
+      query: req.query,
+      body: req.body,
+      params: req.params,
+      headers: req.headers
+    });
+    console.log(products);
     res.json(products);
   } catch (error) {
     handleError(res, error);

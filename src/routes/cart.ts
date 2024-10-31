@@ -23,7 +23,7 @@ router.post('/', async (req: Request, res: Response) => {
 // Get Cart Items by User
 router.get('/:userId', async (req: Request, res: Response) => {
   try {
-    const cartItems = await CartItem.find({ userId: req.params.userId });
+    const cartItems = await CartItem.find({ userId: req.params.userId }).populate('productId');
     res.json(cartItems);
   } catch (error: unknown) {
     if (error instanceof Error) {

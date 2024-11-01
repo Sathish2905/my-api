@@ -20,6 +20,28 @@ router.post('/', async (req, res) => {
     }
   }
 });
+// Get All Categories
+router.get('/', async (req, res) => {
+  try {
+    const categories = await Category.find();
+    const categoriesWithSubs = await Promise.all(
+      categories.map(async (category) => {
+        const subcategories = await SubCategory.find({ categoryId: category._id });
+        return {
+          ...category.toObject(),
+          subcategories
+        };
+      })
+    );
+    res.json(categoriesWithSubs);
+  } catch (error) {
+    if (error instanceof Error) {
+      res.status(400).json({ error: error.message });
+    } else {
+      res.status(400).json({ error: 'An unknown error occurred' });
+    }
+  }
+});
 
 // Get Category by ID
 router.get('/:id', async (req, res) => {

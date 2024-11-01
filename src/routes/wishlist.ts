@@ -23,9 +23,16 @@ router.post('/', async (req, res) => {
 // Get Wishlist by User
 router.get('/:userId', async (req, res) => {
   try {
-    const wishlistItems = await WishlistItem.find({ userId: req.params.userId });
+    const { userId } = req.params;
+    
+    // Add input validation
+    if (!userId) {
+      return res.status(400).json({ error: 'userId is required' });
+    }
+
+    const wishlistItems = await WishlistItem.find({ userId }).populate('productId');;
     res.json(wishlistItems);
-} catch (error) {
+  } catch (error) {
     if (error instanceof Error) {
       res.status(400).json({ error: error.message });
     } else {

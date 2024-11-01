@@ -1,22 +1,20 @@
 import express from 'express';
 import WishlistItem, { IWishlistItem } from '../models/WishlistItem';
+import { CrudController } from '../utils/crudController';
+import { handleError, sendSuccess } from '../utils/routeHelpers';
 
 const router = express.Router();
+const wishlistController = new CrudController<IWishlistItem>(WishlistItem, 'WishlistItem');
 
 // Add Item to Wishlist
 router.post('/', async (req, res) => {
-  const { productId, userId } = req.body;
-  const newWishlistItem: IWishlistItem = new WishlistItem({ productId, userId });
-
   try {
+    const { productId, userId } = req.body;
+    const newWishlistItem = new WishlistItem({ productId, userId });
     const savedWishlistItem = await newWishlistItem.save();
-    res.status(201).json(savedWishlistItem);
-} catch (error) {
-    if (error instanceof Error) {
-      res.status(400).json({ error: error.message });
-    } else {
-      res.status(400).json({ error: 'An unknown error occurred' });
-    }
+    return sendSuccess(res, savedWishlistItem, 201);
+  } catch (error) {
+    return handleError(res, error);
   }
 });
 
@@ -25,35 +23,18 @@ router.get('/:userId', async (req, res) => {
   try {
     const { userId } = req.params;
     
-    // Add input validation
     if (!userId) {
       return res.status(400).json({ error: 'userId is required' });
     }
 
-    const wishlistItems = await WishlistItem.find({ userId }).populate('productId');;
-    res.json(wishlistItems);
+    const wishlistItems = await WishlistItem.find({ userId }).populate('productId');
+    return sendSuccess(res, wishlistItems);
   } catch (error) {
-    if (error instanceof Error) {
-      res.status(400).json({ error: error.message });
-    } else {
-      res.status(400).json({ error: 'An unknown error occurred' });
-    }
+    return handleError(res, error);
   }
 });
 
-// Remove Item from Wishlist
-router.delete('/:id', async (req, res) => {
-  try {
-    const deletedWishlistItem = await WishlistItem.findByIdAndDelete(req.params.id);
-    if (!deletedWishlistItem) return res.status(404).json({ error: 'WishlistItem not found' });
-    res.json(deletedWishlistItem);
-} catch (error) {
-    if (error instanceof Error) {
-      res.status(400).json({ error: error.message });
-    } else {
-      res.status(400).json({ error: 'An unknown error occurred' });
-    }
-  }
-});
+// Use base delete operation
+router.delete('/:id', wishlistController.delete);
 
 export default router;

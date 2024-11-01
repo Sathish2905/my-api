@@ -26,7 +26,6 @@ mongoose.connect('mongodb+srv://root:root@cluster0.mabez.mongodb.net/?retryWrite
   .then(() => console.log('MongoDB connected'))
   .catch((err) => console.error('MongoDB connection error:', err))
   .then(() => {
-    console.log('MongoDB connected');
     app.use('/api', routes);
     app.listen(PORT, () => {
       console.log(`Server is running on port ${PORT}`);

@@ -65,3 +65,10 @@ enum Role {
   admin
   user
 }
+
+model Property {
+  id           String       @id
+  name         String
+  description  String
+  value        String
+}

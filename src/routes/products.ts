@@ -1,24 +1,31 @@
 import express from 'express';
 import Product, { IProduct } from '../models/Product';
+import { CrudController } from '../utils/crudController';
+import { handleError, sendSuccess } from '../utils/routeHelpers';
 
 const router = express.Router();
-
-// Error handler middleware
-const handleError = (res: express.Response, error: unknown) => {
-  if (error instanceof Error) {
-    res.status(400).json({ error: error.message });
-  } else {
-    res.status(400).json({ error: 'An unknown error occurred' });
-  }
-};
+const productController = new CrudController<IProduct>(Product, 'Product');
 
 // Create Product
 router.post('/', async (req, res) => {
   try {
     const { title, description, price, image, categoryId, subCategoryId } = req.body;
-    const newProduct: IProduct = new Product({ title, description, price, image, categoryId, subCategoryId });
-    const savedProduct = await Product.create(newProduct);
-    res.status(201).json(savedProduct);
+    
+    // Validate required fields
+    if (!title || !price) {
+      return res.status(400).json({ error: 'Title and price are required' });
+    }
+
+    const newProduct = await Product.create({ 
+      title, 
+      description, 
+      price, 
+      image, 
+      categoryId, 
+      subCategoryId 
+    });
+    
+    sendSuccess(res, newProduct, 201);
   } catch (error) {
     handleError(res, error);
   }
@@ -28,79 +35,43 @@ router.post('/', async (req, res) => {
 router.get('/', async (req, res) => {
   try {
     const { categoryId, subCategoryId, minPrice, maxPrice, search } = req.query;
-    // Build filter object
-    const filter: any = {};
     
-    if (categoryId) {
-      filter.categoryId = categoryId;
+    // Type-safe filter construction
+    interface ProductFilter {
+      categoryId?: string;
+      subCategoryId?: string;
+      price?: { $gte?: number; $lte?: number };
+      $or?: Array<{ [key: string]: any }>;
     }
-    
-    if (subCategoryId) {
-      filter.subCategoryId = subCategoryId;
-    }
-    
+
+    const filter: ProductFilter = {};
+
+    if (categoryId) filter.categoryId = categoryId as string;
+    if (subCategoryId) filter.subCategoryId = subCategoryId as string;
+
     if (minPrice || maxPrice) {
       filter.price = {};
       if (minPrice) filter.price.$gte = Number(minPrice);
       if (maxPrice) filter.price.$lte = Number(maxPrice);
     }
-    
+
     if (search) {
       filter.$or = [
-        { title: { $regex: search, $options: 'i' } },
-        { description: { $regex: search, $options: 'i' } }
+        { title: { $regex: search as string, $options: 'i' } },
+        { description: { $regex: search as string, $options: 'i' } }
       ];
     }
 
     const products = await Product.find(filter);
-    console.log('Request:', {
-      query: req.query,
-      body: req.body,
-      params: req.params,
-      headers: req.headers
-    });
-    console.log(products);
-    res.json(products);
+    sendSuccess(res, products);
   } catch (error) {
     handleError(res, error);
   }
 });
 
-// Get Product by ID
-router.get('/:id', async (req, res) => {
-  try {
-    const product = await Product.findById(req.params.id);
-    if (!product) return res.status(404).json({ error: 'Product not found' });
-    res.json(product);
-  } catch (error) {
-    handleError(res, error);
-  }
-});
-
-// Update Product
-router.put('/:id', async (req, res) => {
-  try {
-    const updatedProduct = await Product.findByIdAndUpdate(
-      req.params.id, 
-      req.body, 
-      { new: true }
-    );
-    if (!updatedProduct) return res.status(404).json({ error: 'Product not found' });
-    res.json(updatedProduct);
-  } catch (error) {
-    handleError(res, error);
-  }
-});
-
-// Delete Product
-router.delete('/:id', async (req, res) => {
-  try {
-    const deletedProduct = await Product.findByIdAndDelete(req.params.id);
-    if (!deletedProduct) return res.status(404).json({ error: 'Product not found' });
-    res.json(deletedProduct);
-  } catch (error) {
-    handleError(res, error);
-  }
-});
+// Use existing controller for standard CRUD operations
+router.get('/:id', productController.getById);
+router.put('/:id', productController.update);
+router.delete('/:id', productController.delete);
 
 export default router;

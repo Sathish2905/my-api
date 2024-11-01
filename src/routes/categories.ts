@@ -1,26 +1,19 @@
 import express from 'express';
-import Category, { ICategory } from '../models/Category';
-import SubCategory, { ISubCategory } from '../models/SubCategory';
+import Category from '../models/Category';
+import SubCategory from '../models/SubCategory';
+import { CrudController } from '../utils/crudController';
+import { handleError, sendSuccess } from '../utils/routeHelpers';
 
 const router = express.Router();
+const categoryController = new CrudController(Category, 'Category');
 
-// Create Category
-router.post('/', async (req, res) => {
-  const { name } = req.body;
-  const newCategory: ICategory = new Category({ name });
+// Use the base CRUD operations
+router.post('/', categoryController.create);
+router.get('/:id', categoryController.getById);
+router.put('/:id', categoryController.update);
+router.delete('/:id', categoryController.delete);
 
-  try {
-    const savedCategory = await newCategory.save();
-    res.status(201).json(savedCategory);
-  } catch (error) {
-    if (error instanceof Error) {
-      res.status(400).json({ error: error.message });
-    } else {
-      res.status(400).json({ error: 'An unknown error occurred' });
-    }
-  }
-});
-// Get All Categories
+// Custom implementation for getting categories with subcategories
 router.get('/', async (req, res) => {
   try {
     const categories = await Category.find();
@@ -33,76 +26,23 @@ router.get('/', async (req, res) => {
         };
       })
     );
-    res.json(categoriesWithSubs);
+    return sendSuccess(res, categoriesWithSubs);
   } catch (error) {
-    if (error instanceof Error) {
-      res.status(400).json({ error: error.message });
-    } else {
-      res.status(400).json({ error: 'An unknown error occurred' });
-    }
-  }
-});
-
-// Get Category by ID
-router.get('/:id', async (req, res) => {
-  try {
-    const category = await Category.findById(req.params.id);
-    if (!category) return res.status(404).json({ error: 'Category not found' });
-    res.json(category);
-  } catch (error) {
-    if (error instanceof Error) {
-      res.status(400).json({ error: error.message });
-    } else {
-      res.status(400).json({ error: 'An unknown error occurred' });
-    }
-  }
-});
-
-// Update Category
-router.put('/:id', async (req, res) => {
-  try {
-    const updatedCategory = await Category.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    if (!updatedCategory) return res.status(404).json({ error: 'Category not found' });
-    res.json(updatedCategory);
-  } catch (error) {
-    if (error instanceof Error) {
-      res.status(400).json({ error: error.message });
-    } else {
-      res.status(400).json({ error: 'An unknown error occurred' });
-    }
-  }
-});
-
-// Delete Category
-router.delete('/:id', async (req, res) => {
-  try {
-    const deletedCategory = await Category.findByIdAndDelete(req.params.id);
-    if (!deletedCategory) return res.status(404).json({ error: 'Category not found' });
-    res.json(deletedCategory);
-  } catch (error) {
-    if (error instanceof Error) {
-      res.status(400).json({ error: error.message });
-    } else {
-      res.status(400).json({ error: 'An unknown error occurred' });
-    }
+    return handleError(res, error);
   }
 });
 
 // Create SubCategory
 router.post('/:categoryId/subcategories', async (req, res) => {
-  const { name } = req.body;
-  const { categoryId } = req.params;
-  const newSubCategory: ISubCategory = new SubCategory({ name, categoryId });
-
   try {
-    const savedSubCategory = await newSubCategory.save();
-    res.status(201).json(savedSubCategory);
+    const newSubCategory = new SubCategory({
+      name: req.body.name,
+      categoryId: req.params.categoryId
+    });
+    const saved = await newSubCategory.save();
+    return sendSuccess(res, saved, 201);
   } catch (error) {
-    if (error instanceof Error) {
-      res.status(400).json({ error: error.message });
-    } else {
-      res.status(400).json({ error: 'An unknown error occurred' });
-    }
+    return handleError(res, error);
   }
 });
 

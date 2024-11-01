@@ -17,6 +17,6 @@ router.use('/categories', categoryRoutes);
 router.use('/subCategories', subCategoryRoutes);
 router.use('/cart', cartRoutes);
 router.use('/wishlist', wishlistRoutes);
-router.use('/property', propertyRoutes);
+router.use('/properties', propertyRoutes);
 
 export default router;
